@@ -24,16 +24,23 @@ class SheetsClient:
             credentials_path: Path to service account credentials JSON.
             sheet_id: Google Sheets document ID.
         """
-        self.sheet_id = sheet_id
+        if not sheet_id or sheet_id.strip() == "":
+            raise ValueError("❌ Critical Error: Google Sheet ID is empty or not configured correctly.")
+            
+        self.sheet_id = sheet_id.strip()
         self.service = self._authenticate(credentials_path)
 
     def _authenticate(self, credentials_path: str):
         """Authenticate with Google Sheets API."""
         try:
+            # Suppress discovery cache warning
+            import logging
+            logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
+            
             creds = Credentials.from_service_account_file(
                 credentials_path, scopes=self.SCOPES
             )
-            return build("sheets", "v4", credentials=creds)
+            return build("sheets", "v4", credentials=creds, cache_discovery=False)
         except Exception as e:
             logger.error(f"Authentication failed: {e}")
             raise
