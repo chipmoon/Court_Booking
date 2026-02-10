@@ -3,7 +3,7 @@ name: Update Court Availability
 on:
   schedule:
     # Run every 30 minutes
-    - cron: '0,30 7-14 * * *'
+    - cron: '0,5 7-8 * * *'
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
