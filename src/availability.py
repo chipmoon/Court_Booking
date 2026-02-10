@@ -51,14 +51,16 @@ class AvailabilityDashboard:
         """Generates the 7-day visual matrix using enterprise settings."""
         from dateutil import tz
         taiwan_tz = tz.gettz("Asia/Taipei")
-        now_taiwan = datetime.now(taiwan_tz).strftime("%Y-%m-%d %H:%M")
+        now_taiwan_dt = datetime.now(taiwan_tz)
+        now_taiwan_str = now_taiwan_dt.strftime("%Y-%m-%d %H:%M")
         
-        start_date = datetime.now()
+        # Start from TODAY in Taiwan time
+        start_date = now_taiwan_dt.replace(hour=0, minute=0, second=0, microsecond=0)
         dates = [start_date + timedelta(days=i) for i in range(7)]
         headers = ["Time Slot & Court"] + [d.strftime("%a %d/%m") for d in dates]
         
         view = [
-            [f"📅 Court Availability Dashboard - Updated: {now_taiwan} (Taipei Time)"] + [""] * 7,
+            [f"📅 Court Availability Dashboard - Updated: {now_taiwan_str} (Taipei Time)"] + [""] * 7,
             headers
         ]
         
