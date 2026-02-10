@@ -85,16 +85,16 @@ class BookingManager:
                 return False
         return True
 
-    def create_booking(self, booking: Booking) -> tuple[bool, str]:
+    def create_booking(self, booking: Booking) -> tuple[bool, str, Optional[int]]:
         if not self.check_availability(booking.date, booking.time_slot, booking.court):
-            return False, "ALREADY RESERVED"
+            return False, "ALREADY RESERVED", None
         
         try:
-            self.client.append_row(f"'{self.sheet_name}'!A:I", booking.to_row())
+            row_num = self.client.append_row(f"'{self.sheet_name}'!A:I", booking.to_row())
             self._cached_bookings.append(booking)
-            return True, "BOOKED"
+            return True, "BOOKED", row_num
         except Exception as e:
-            return False, f"DB ERROR: {str(e)}"
+            return False, f"DB ERROR: {str(e)}", None
 
     def cancel_booking(self, date: datetime, time_slot: str, court: int, name: str) -> tuple[bool, str]:
         self.refresh_cache()
@@ -112,3 +112,17 @@ class BookingManager:
                 self.client.update_cell(self.sheet_name, row_idx, 7, "⚪ Cancelled")
                 return True, "RELEASED"
         return False, "BOOKING NOT FOUND"
+
+    def find_conflicts(self) -> List[str]:
+        """Identify overbooked slots in the current registry."""
+        conflicts = []
+        schedule = {}
+        
+        for b in self._cached_bookings:
+            if "Booked" in b.status:
+                key = f"{b.date.strftime('%Y-%m-%d')}_{b.time_slot}_{b.court}"
+                if key in schedule:
+                    conflicts.append(f"Conflict on {key}: {schedule[key]} and {b.customer_name}")
+                else:
+                    schedule[key] = b.customer_name
+        return conflicts

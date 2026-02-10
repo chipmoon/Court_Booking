@@ -32,8 +32,10 @@ class AvailabilityDashboard:
             # 4. Write to Sheet (Atomic operation)
             self.client.write_range(f"'{self.sheet_name}'!A1:H100", view)
             logger.info("✅ Dashboard updated successfully (100% Fresh State).")
+            return True
         except Exception as e:
             logger.error(f"Critical Dashboard Repair Required: {e}")
+            return False
 
     def _create_lookup_map(self, bookings: List[Booking]) -> Dict[str, str]:
         """Creates a high-performance hash map for the generator."""
