@@ -98,12 +98,35 @@ class SheetsClient:
                 range=range_name,
                 valueInputOption=value_input_option,
                 body=body,
+                responseValueRenderOption="FORMATTED_VALUE" 
             )
             self._execute_with_retry(request)
             logger.info(f"Successfully wrote to {range_name}")
             return True
         except HttpError as e:
             logger.error(f"Error writing to {range_name}: {e}")
+            raise
+
+    def clear_range(self, range_name: str) -> bool:
+        """Clear values from a specific range.
+
+        Args:
+            range_name: A1 notation range.
+
+        Returns:
+            True if successful.
+        """
+        try:
+            request = self.service.spreadsheets().values().clear(
+                spreadsheetId=self.sheet_id,
+                range=range_name,
+                body={}
+            )
+            self._execute_with_retry(request)
+            logger.info(f"Successfully cleared {range_name}")
+            return True
+        except HttpError as e:
+            logger.error(f"Error clearing {range_name}: {e}")
             raise
 
     def append_row(

@@ -39,9 +39,44 @@ def cmd_update():
     logger.info("=== Starting scheduled update ===")
     
     try:
-        _, booking_manager, dashboard = initialize_components()
+        sheets_client, booking_manager, dashboard = initialize_components()
+        settings = get_settings()
         
-        # Update dashboard
+        # 1. OPTIONAL: Ensure sheet structure (Dropdowns, Tabs)
+        try:
+            from datetime import timedelta
+            logger.info("Standardizing UI controls and headers...")
+            
+            # Ensure headers match processing logic
+            req_headers = [["ACTION", "Date", "Time", "Court", "Name", "Phone", "Email", "Notes", "BOOKING_STATUS"]]
+            sheets_client.write_range(f"'{settings.requests_sheet_name}'!A1:I1", req_headers)
+            
+            dates = [(datetime.now() + timedelta(days=d)).strftime("%Y-%m-%d") for d in range(14)]
+            times = [f"{h:02d}:00" for h in range(settings.operating_hours_start, settings.operating_hours_end)]
+            courts = [str(c) for c in range(1, settings.court_count + 1)]
+            actions = ["🆕 BOOKING", "🚫 CANCEL"]
+            
+            sheets_client.set_dropdown(settings.requests_sheet_name, "A2:A300", actions)
+            sheets_client.set_dropdown(settings.requests_sheet_name, "B2:B300", dates)
+            sheets_client.set_dropdown(settings.requests_sheet_name, "C2:C300", times)
+            sheets_client.set_dropdown(settings.requests_sheet_name, "D2:D300", courts)
+        except Exception as ui_err:
+            logger.warning(f"UI standardization skipped: {ui_err}")
+
+        # 2. Process pending requests from '📥 Booking Requests'
+        logger.info("Processing pending requests...")
+        processed = booking_manager.process_requests()
+        logger.info(f"Processed {processed} new transactions.")
+        
+        # 3. Archive processed or passed requests (Global Purge Mode)
+        logger.info("Archiving old data (Elon Musk Mode)...")
+        archived = booking_manager.archive_old_data()
+        logger.info(f"Archived {archived} records to history.")
+        
+        # 4. Refresh memory after processing requests
+        booking_manager.refresh_cache()
+        
+        # 5. Update availability dashboard
         logger.info("Updating availability dashboard...")
         success = dashboard.update_dashboard()
         
@@ -49,7 +84,7 @@ def cmd_update():
             logger.error("Dashboard update failed")
             sys.exit(1)
         
-        # Check for conflicts
+        # 5. Check for conflicts
         logger.info("Checking for booking conflicts...")
         conflicts = booking_manager.find_conflicts()
         
