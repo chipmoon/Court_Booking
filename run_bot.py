@@ -64,59 +64,8 @@ class CourtBookingBot:
             logger.error(f"Setup Warning: {e}")
 
     def process_unified_requests(self):
-        """Atomic Transaction Processing with state-aware feedback."""
-        self.manager.refresh_cache()
-        rows = self.client.read_range(f"'{self.settings.requests_sheet_name}'!A2:I")
-        
-        if not rows: return 0
-
-        processed = 0
-        for i, row in enumerate(rows):
-            row_idx = i + 2
-            if not row: continue
-
-            # State Logic
-            action = str(row[0]).upper()
-            status = str(row[8]) if len(row) >= 9 else ""
-            
-            if ("BOOK" in action or "🆕" in action) and "✅ BOOKED" in status:
-                continue
-            if ("CANCEL" in action or "🚫" in action) and "✅ CANCELLED" in status:
-                continue
-
-            if len(row) < 5: continue
-            
-            try:
-                date_obj = datetime.strptime(str(row[1]).strip(), "%Y-%m-%d")
-                time_str = str(row[2]).strip()
-                court_num = int(float(row[3]))
-                name_attr = str(row[4]).strip()
-
-                if "BOOK" in action or "🆕" in action:
-                    new_b = Booking(
-                        date=date_obj, time_slot=time_str if ":" in time_str else f"{time_str}:00",
-                        court=court_num, customer_name=name_attr,
-                        phone=str(row[5]) if len(row) > 5 else "N/A",
-                        email=str(row[6]) if len(row) > 6 else "N/A",
-                        notes=str(row[7]) if len(row) > 7 else ""
-                    )
-                    success, msg = self.manager.create_booking(new_b)
-                    final_status = f"✅ BOOKED" if success else f"❌ {msg}"
-                
-                elif "CANCEL" in action or "🚫" in action:
-                    success, msg = self.manager.cancel_booking(date_obj, time_str, court_num, name_attr)
-                    final_status = f"✅ CANCELLED" if success else f"❌ {msg}"
-                
-                else:
-                    final_status = "❌ ACTION REQUIRED"
-
-                self.client.update_cell(self.settings.requests_sheet_name, row_idx, 9, final_status)
-                if success: processed += 1
-
-            except Exception as e:
-                self.client.update_cell(self.settings.requests_sheet_name, row_idx, 9, f"❌ DATA ERROR")
-
-        return processed
+        """Atomic Transaction Processing using centralized manager logic."""
+        return self.manager.process_requests()
 
     def run(self):
         print("\n" + "="*40)
@@ -129,7 +78,12 @@ class CourtBookingBot:
             count = self.process_unified_requests()
             # 3. CRITICAL: Refresh memory one more time before Dashboard update
             self.manager.refresh_cache()
-            # 4. Render Fresh Dashboard
+            
+            # 4. Archive old processed data (Elon Musk: Global Cleanup)
+            logger.info("Archiving old data (Global Purge)...")
+            self.manager.archive_old_data()
+            
+            # 5. Render Fresh Dashboard
             self.dashboard.update_dashboard()
             
             print("="*40)
