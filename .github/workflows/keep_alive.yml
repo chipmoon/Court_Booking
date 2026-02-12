@@ -1,0 +1,29 @@
+name: Streamlit Keep Alive
+
+on:
+  schedule:
+    # This runs every 6 hours (UTC). 
+    # It ensures the app never hits the 12-hour sleep limit.
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Allows manual trigger for testing
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake up Streamlit App
+        shell: bash
+        env:
+          # Tip: Store your URL in GitHub Secrets as STREAMLIT_URL for security
+          # Otherwise, hardcode it below replacing 'https://your-app-name.streamlit.app'
+          APP_URL: ${{ secrets.STREAMLIT_URL || 'https://your-app-name.streamlit.app' }}
+        run: |
+          echo "Pinging $APP_URL..."
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -I "$APP_URL")
+          
+          if [ "$RESPONSE" -eq 200 ] || [ "$RESPONSE" -eq 301 ] || [ "$RESPONSE" -eq 302 ]; then
+            echo "✅ Success! App is awake (Status: $RESPONSE)"
+          else
+            echo "⚠️ Warning: Received status $RESPONSE. The app might be sleeping or the URL is incorrect."
+            # We don't fail the job here to avoid annoying 'failed' emails if it's just a transient issue
+          fi
