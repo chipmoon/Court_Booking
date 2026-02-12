@@ -109,8 +109,25 @@ st.markdown("""
 @st.cache_resource
 def get_components():
     settings = get_settings()
+    
+    # --- Expert Deploy: Secrets Management ---
+    # On Streamlit Cloud, use Secrets. On local, fallback to JSON file.
+    creds_info = None
+    if "GOOGLE_CREDENTIALS" in st.secrets:
+        creds_info = st.secrets["GOOGLE_CREDENTIALS"]
+        # Streamlit secrets sometimes returns a string for multiline TOML or JSON
+        if isinstance(creds_info, str):
+            import json
+            try:
+                creds_info = json.loads(creds_info)
+            except json.JSONDecodeError:
+                st.error("❌ GOOGLE_CREDENTIALS secret is not a valid JSON string.")
+                raise
+    else:
+        creds_info = settings.google_credentials_path
+
     sheets_client = SheetsClient(
-        credentials_path=settings.google_credentials_path,
+        credentials_path=creds_info,
         sheet_id=settings.sheet_id
     )
     booking_manager = BookingManager(sheets_client)
