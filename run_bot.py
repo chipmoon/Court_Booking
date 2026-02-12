@@ -59,7 +59,31 @@ class CourtBookingBot:
             self.client.set_dropdown(self.settings.requests_sheet_name, "C2:C300", times)
             self.client.set_dropdown(self.settings.requests_sheet_name, "D2:D300", courts)
 
-            logger.info("✅ Workspace is standardized.")
+            # --- PREMIUM DECORATION (Mobile Friendly) ---
+            req_sheet = self.settings.requests_sheet_name
+            # 1. Header Styling
+            header_bg = {"red": 0.17, "green": 0.24, "blue": 0.31} # Dark Blue/Grey
+            header_text = {"red": 1.0, "green": 1.0, "blue": 1.0}
+            self.client.format_cells(req_sheet, "A1:I1", bg_color=header_bg, text_color=header_text, bold=True, font_size=12, horizontal_alignment="CENTER")
+            
+            # 2. Touch-Friendly Rows (Larger selection area)
+            self.client.set_row_height(req_sheet, 0, 300, 45)
+            self.client.set_column_width(req_sheet, 0, 9, 120) # Standard width
+            self.client.set_column_width(req_sheet, 8, 9, 200) # Status Notes wider
+            
+            # 3. Conditional Color Branding
+            rules = [
+                {"text": "🆕 BOOKING", "bg_color": {"red": 0.82, "green": 0.94, "blue": 0.85}, "text_color": {"red": 0.1, "green": 0.4, "blue": 0.1}},
+                {"text": "🚫 CANCEL", "bg_color": {"red": 0.98, "green": 0.85, "blue": 0.85}, "text_color": {"red": 0.6, "green": 0.1, "blue": 0.1}},
+                {"text": "✅", "bg_color": {"red": 0.8, "green": 1.0, "blue": 0.8}},
+                {"text": "❌", "bg_color": {"red": 1.0, "green": 0.8, "blue": 0.8}},
+                {"text": "DONE", "bg_color": {"red": 0.85, "green": 1.0, "blue": 0.85}},
+                {"text": "ERROR", "bg_color": {"red": 1.0, "green": 0.85, "blue": 0.85}}
+            ]
+            self.client.add_conditional_formatting(req_sheet, "A2:A300", rules[:2]) # Actions
+            self.client.add_conditional_formatting(req_sheet, "I2:I300", rules[2:]) # Status
+
+            logger.info("✅ Workspace is standardized with Premium UI.")
         except Exception as e:
             logger.error(f"Setup Warning: {e}")
 
@@ -69,7 +93,7 @@ class CourtBookingBot:
 
     def run(self):
         print("\n" + "="*40)
-        print("🏟️ EXECUTIVE FACILITY SYNC: ACTIVE")
+        print("EXECUTIVE FACILITY SYNC: ACTIVE")
         print("="*40)
         try:
             # 1. Standardize Environment
@@ -87,7 +111,7 @@ class CourtBookingBot:
             self.dashboard.update_dashboard()
             
             print("="*40)
-            print(f"✨ COMPLETED: {count} OPERATIONS SYNCED")
+            print(f"COMPLETED: {count} OPERATIONS SYNCED")
             print("="*40 + "\n")
         except Exception as e:
             logger.error(f"Sync Failure: {e}")
