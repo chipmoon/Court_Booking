@@ -285,3 +285,165 @@ class SheetsClient:
         except HttpError as e:
             logger.error(f"Batch update failed: {e}")
             raise
+
+    def set_row_height(self, sheet_name: str, start_row: int, end_row: int, height: int):
+        """Set height of rows for better mobile touch experience."""
+        sheet_id = self.get_sheet_id(sheet_name)
+        if sheet_id is None: return
+        
+        request = {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "dimension": "ROWS",
+                    "startIndex": start_row,
+                    "endIndex": end_row
+                },
+                "properties": {
+                    "pixelSize": height
+                },
+                "fields": "pixelSize"
+            }
+        }
+        return self.batch_update([request])
+
+    def set_column_width(self, sheet_name: str, start_col: int, end_col: int, width: int):
+        """Set width of columns for better visualization."""
+        sheet_id = self.get_sheet_id(sheet_name)
+        if sheet_id is None: return
+        
+        request = {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "dimension": "COLUMNS",
+                    "startIndex": start_col,
+                    "endIndex": end_col
+                },
+                "properties": {
+                    "pixelSize": width
+                },
+                "fields": "pixelSize"
+            }
+        }
+        return self.batch_update([request])
+
+    def format_cells(self, sheet_name: str, range_name: str, 
+                     bg_color: Dict[str, float] = None, 
+                     text_color: Dict[str, float] = None, 
+                     bold: bool = False, 
+                     font_size: int = 10,
+                     horizontal_alignment: str = "LEFT"):
+        """Apply formatting to a range of cells using precise field masks."""
+        sheet_id = self.get_sheet_id(sheet_name)
+        if sheet_id is None: return
+
+        # Simple range parser (A1:B10)
+        import re
+        match = re.match(r"([A-Z]+)(\d+):([A-Z]+)(\d+)", range_name.upper())
+        if not match: return
+        
+        start_col_str, start_row_str, end_col_str, end_row_str = match.groups()
+        
+        def col_to_index(col):
+            index = 0
+            for char in col: index = index * 26 + (ord(char) - ord('A') + 1)
+            return index - 1
+
+        start_col = col_to_index(start_col_str)
+        end_col = col_to_index(end_col_str) + 1
+        start_row = int(start_row_str) - 1
+        end_row = int(end_row_str)
+
+        # 1. Start with base fields
+        fields_list = [
+            "userEnteredFormat.textFormat.bold",
+            "userEnteredFormat.textFormat.fontSize",
+            "userEnteredFormat.horizontalAlignment"
+        ]
+        
+        # 2. Base cell data
+        cell_data = {
+            "userEnteredFormat": {
+                "textFormat": {
+                    "bold": bold,
+                    "fontSize": font_size
+                },
+                "horizontalAlignment": horizontal_alignment
+            }
+        }
+
+        # 3. Dynamic overrides
+        if bg_color:
+            cell_data["userEnteredFormat"]["backgroundColor"] = bg_color
+            fields_list.append("userEnteredFormat.backgroundColor")
+            
+        if text_color:
+            cell_data["userEnteredFormat"]["textFormat"]["foregroundColor"] = text_color
+            fields_list.append("userEnteredFormat.textFormat.foregroundColor")
+
+        request = {
+            "repeatCell": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "startRowIndex": start_row,
+                    "endRowIndex": end_row,
+                    "startColumnIndex": start_col,
+                    "endColumnIndex": end_col
+                },
+                "cell": cell_data,
+                "fields": ",".join(fields_list)
+            }
+        }
+        
+        return self.batch_update([request])
+
+    def add_conditional_formatting(self, sheet_name: str, range_name: str, rules: List[Dict]):
+        """Add conditional formatting rules to a range."""
+        sheet_id = self.get_sheet_id(sheet_name)
+        if sheet_id is None: return
+
+        import re
+        match = re.match(r"([A-Z]+)(\d+):([A-Z]+)(\d+)", range_name.upper())
+        if not match: return
+        start_col_str, start_row_str, end_col_str, end_row_str = match.groups()
+        
+        def col_to_index(col):
+            index = 0
+            for char in col: index = index * 26 + (ord(char) - ord('A') + 1)
+            return index - 1
+
+        start_col = col_to_index(start_col_str)
+        end_col = col_to_index(end_col_str) + 1
+        start_row = int(start_row_str) - 1
+        end_row = int(end_row_str)
+
+        requests = []
+        for rule in rules:
+            formatted_rule = {
+                "addConditionalFormatRule": {
+                    "rule": {
+                        "ranges": [{
+                            "sheetId": sheet_id,
+                            "startRowIndex": start_row,
+                            "endRowIndex": end_row,
+                            "startColumnIndex": start_col,
+                            "endColumnIndex": end_col
+                        }],
+                        "booleanRule": {
+                            "condition": {
+                                "type": "TEXT_CONTAINS",
+                                "values": [{"userEnteredValue": rule["text"]}]
+                            },
+                            "format": {
+                                "backgroundColor": rule["bg_color"],
+                                "textFormat": {"foregroundColor": rule.get("text_color", {"red": 0, "green": 0, "blue": 0}), "bold": True}
+                            }
+                        }
+                    },
+                    "index": 0
+                }
+            }
+            requests.append(formatted_rule)
+        
+        return self.batch_update(requests)

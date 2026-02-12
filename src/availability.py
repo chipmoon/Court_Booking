@@ -31,7 +31,26 @@ class AvailabilityDashboard:
             
             # 4. Write to Sheet (Atomic operation)
             self.client.write_range(f"'{self.sheet_name}'!A1:H100", view)
-            logger.info("✅ Dashboard updated successfully (100% Fresh State).")
+            
+            # --- DASHBOARD PREMIUM DECORATION ---
+            # 1. Header (A1) & Column Headers (A2:H2)
+            self.client.format_cells(self.sheet_name, "A1:H1", bg_color={"red": 0.17, "green": 0.24, "blue": 0.31}, text_color={"red": 1.0, "green": 1.0, "blue": 1.0}, bold=True, font_size=14, horizontal_alignment="CENTER")
+            self.client.format_cells(self.sheet_name, "A2:H2", bg_color={"red": 0.9, "green": 0.9, "blue": 0.9}, bold=True, font_size=11, horizontal_alignment="CENTER")
+            
+            # 2. Dimensions (Mobile Friendly)
+            self.client.set_row_height(self.sheet_name, 0, 1, 60) # Title
+            self.client.set_row_height(self.sheet_name, 1, 100, 40) # Content rows
+            self.client.set_column_width(self.sheet_name, 0, 1, 180) # Time/Court column
+            self.client.set_column_width(self.sheet_name, 1, 8, 140) # Date columns
+            
+            # 3. Conditional Formatting Matrix
+            rules = [
+                {"text": "✅ Available", "bg_color": {"red": 0.9, "green": 1.0, "blue": 0.9}, "text_color": {"red": 0.0, "green": 0.5, "blue": 0.0}},
+                {"text": "🔴", "bg_color": {"red": 1.0, "green": 0.9, "blue": 0.9}, "text_color": {"red": 0.7, "green": 0.0, "blue": 0.0}}
+            ]
+            self.client.add_conditional_formatting(self.sheet_name, "B3:H100", rules)
+
+            logger.info("✅ Dashboard updated successfully (Premium Aesthetics Applied).")
             return True
         except Exception as e:
             logger.error(f"Critical Dashboard Repair Required: {e}")
