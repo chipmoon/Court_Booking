@@ -17,11 +17,11 @@ class SheetsClient:
 
     SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
-    def __init__(self, credentials_path: str, sheet_id: str):
+    def __init__(self, credentials_path: Any, sheet_id: str):
         """Initialize the Sheets client.
 
         Args:
-            credentials_path: Path to service account credentials JSON.
+            credentials_path: Path to JSON file OR a dictionary containing service account credentials.
             sheet_id: Google Sheets document ID.
         """
         if not sheet_id or sheet_id.strip() == "":
@@ -30,16 +30,23 @@ class SheetsClient:
         self.sheet_id = sheet_id.strip()
         self.service = self._authenticate(credentials_path)
 
-    def _authenticate(self, credentials_path: str):
-        """Authenticate with Google Sheets API."""
+    def _authenticate(self, credentials_path: Any):
+        """Authenticate with Google Sheets API supporting both files and dicts."""
         try:
             # Suppress discovery cache warning
             import logging
             logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
             
-            creds = Credentials.from_service_account_file(
-                credentials_path, scopes=self.SCOPES
-            )
+            if isinstance(credentials_path, dict):
+                logger.info("Authenticating using credentials dictionary/secrets.")
+                creds = Credentials.from_service_account_info(
+                    credentials_path, scopes=self.SCOPES
+                )
+            else:
+                logger.info(f"Authenticating using credentials file: {credentials_path}")
+                creds = Credentials.from_service_account_file(
+                    credentials_path, scopes=self.SCOPES
+                )
             return build("sheets", "v4", credentials=creds, cache_discovery=False)
         except Exception as e:
             logger.error(f"Authentication failed: {e}")
