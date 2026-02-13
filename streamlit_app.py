@@ -158,42 +158,72 @@ st.markdown("""
     }
 
     /* ULTRA-SHARP TAB OPTIMIZATION */
-    /* Target the tab text with extra-bold weight and high-definition rendering */
+    /* Consistent with 'Create New Reservation' (H3) Style */
+    div[data-baseweb="tab-list"] {
+        background: rgba(0,0,0,0.03);
+        padding: 5px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+    }
+    
     div[data-baseweb="tab"] p {
-        font-size: 1.1rem !important; /* Slightly larger for better tap targets */
-        font-weight: 800 !important; /* Extra Bold for maximum sharpness */
-        letter-spacing: 0.5px !important; /* Prevent letter crowding */
-        color: #000000 !important; /* Absolute Black for extreme contrast */
+        font-family: 'Outfit', sans-serif !important;
+        font-size: 1.2rem !important; /* Larger, more readable */
+        font-weight: 800 !important; 
+        letter-spacing: -0.01em !important;
+        color: #111827 !important; /* Deepest Obsidian */
+        text-transform: uppercase;
         -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
         transition: var(--transition);
     }
 
-    /* Active tab text - Ultra Sharp Red */
+    /* Active tab text - High Definition Contrast */
+    div[aria-selected="true"] {
+        background: white !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    }
+    
     div[aria-selected="true"] p {
-        color: #FF0000 !important; /* Pure High-Vis Red */
-        text-shadow: 0 0 1px rgba(255,0,0,0.1); /* Subtle depth without blurring */
+        color: #E11D48 !important; /* Sharp Modern Rose/Red */
+        transform: scale(1.05); /* Slight pop effect */
     }
 
-    /* Active tab indicator (the line underneath) */
+    /* Active tab indicator (remove the thin line for a cleaner pill look) */
     div[data-baseweb="tab-highlight"] {
-        background-color: #dc2626 !important;
+        display: none !important;
     }
 
-    /* Hover effect for tabs */
-    div[data-baseweb="tab"]:hover p {
-        color: #2563eb !important; /* Blue on hover */
+    /* METRIC ENHANCEMENT - TODAY'S WORK LINE */
+    [data-testid="stMetric"] {
+        background: white;
+        border: 2px solid #f1f5f9;
+        padding: 15px !important;
+        border-radius: 18px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: var(--transition);
+    }
+    
+    [data-testid="stMetricValue"] {
+        font-size: 2.2rem !important;
+        color: #1e40af !important; /* Deeper Professional Blue */
+        line-height: 1;
+    }
+    
+    [data-testid="stMetricLabel"] {
+        color: #475569 !important; /* Sharper Slate Grey */
+        font-weight: 700 !important;
+        font-size: 0.85rem !important;
+        margin-bottom: 5px;
     }
 
-    /* Mobile tab adjustments */
+    /* Mobile adjustments */
     @media (max-width: 768px) {
-        div[data-baseweb="tab"] {
-            padding-left: 10px !important;
-            padding-right: 10px !important;
-        }
         div[data-baseweb="tab"] p {
-            font-size: 0.85rem !important;
+            font-size: 0.95rem !important;
+        }
+        [data-testid="stMetricValue"] {
+            font-size: 1.8rem !important;
         }
     }
 </style>
