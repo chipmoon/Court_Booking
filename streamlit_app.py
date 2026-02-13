@@ -156,6 +156,41 @@ st.markdown("""
         border-radius: 15px;
         overflow: hidden;
     }
+
+    /* HIGH CONTRAST TAB OPTIMIZATION */
+    /* Target the tab text */
+    div[data-baseweb="tab"] p {
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        transition: var(--transition);
+        color: #0f172a !important; /* Deep Black/Slate for inactive */
+    }
+
+    /* Active tab text */
+    div[aria-selected="true"] p {
+        color: #dc2626 !important; /* Premium Red for active */
+    }
+
+    /* Active tab indicator (the line underneath) */
+    div[data-baseweb="tab-highlight"] {
+        background-color: #dc2626 !important;
+    }
+
+    /* Hover effect for tabs */
+    div[data-baseweb="tab"]:hover p {
+        color: #2563eb !important; /* Blue on hover */
+    }
+
+    /* Mobile tab adjustments */
+    @media (max-width: 768px) {
+        div[data-baseweb="tab"] {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
+        div[data-baseweb="tab"] p {
+            font-size: 0.85rem !important;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
