@@ -54,53 +54,107 @@ st.set_page_config(
     page_title="Executive Badminton Court Manager",
     page_icon="🏸",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed", # Better for mobile first view
 )
 
-# Custom CSS for Premium Look
+# Custom CSS for Premium Look & Mobile Optimization
 st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+    :root {
+        --primary: #1e3a8a;
+        --secondary: #3b82f6;
+        --success: #10b981;
+        --error: #ef4444;
+        --bg: #f8fafc;
+        --card-bg: rgba(255, 255, 255, 0.85);
+        --text: #1e293b;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     /* Main background */
     .stApp {
-        background-color: #f8f9fa;
+        background: radial-gradient(circle at top right, #e0e7ff 0%, #f8fafc 100%);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--text);
     }
+
     /* Headers */
     h1, h2, h3 {
-        color: #1e3a5f;
-        font-family: 'Outfit', sans-serif;
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.02em;
     }
-    /* Metric styling */
-    [data-testid="stMetricValue"] {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #2e7d32;
-    }
-    /* Card-like containers */
-    .stCard {
-        background-color: white;
+
+    /* Professional Card styling */
+    .glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
         padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
         margin-bottom: 1rem;
+        transition: var(--transition);
     }
+    .glass-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Metric Customization */
+    [data-testid="stMetricValue"] {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    [data-testid="stMetricLabel"] {
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.8rem;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+        .stMetric {
+            background: white;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            margin-bottom: 10px;
+        }
+        h1 { font-size: 1.8rem !important; }
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 10px;
+        }
+        .stTabs [data-baseweb="tab"] {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+    }
+
     /* Button styling */
-    .stButton>button {
-        border-radius: 8px;
+    div.stButton > button {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 12px;
         font-weight: 600;
-        transition: all 0.3s ease;
+        transition: var(--transition);
+        width: 100%;
     }
-    .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    div.stButton > button:hover {
+        opacity: 0.9;
+        transform: scale(1.02);
     }
-    /* Status indicators */
-    .status-booked {
-        color: #d32f2f;
-        font-weight: bold;
-    }
-    .status-available {
-        color: #388e3c;
-        font-weight: bold;
+
+    /* Table/Dataframe overrides */
+    .stDataFrame {
+        border-radius: 15px;
+        overflow: hidden;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -191,50 +245,80 @@ with st.sidebar:
     st.caption(f"Last updated: {get_taipei_now().strftime('%H:%M:%S')}")
 
 # Main Content
-st.title("🏸 Executive Badminton Court Manager")
-st.subheader("High-Performance Facility Control")
+# Professional Header with Status Badge
+st.markdown(f"""
+<div style="background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%); padding: 2rem; border-radius: 24px; color: white; margin-bottom: 2rem; box-shadow: 0 10px 25px rgba(30, 58, 138, 0.2);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="color: white !important; margin: 0; font-size: 2.2rem; display: flex; align-items: center; gap: 15px;">
+                🏸 Executive Court <span style="font-weight: 300; opacity: 0.9;">Manager</span>
+            </h1>
+            <p style="margin: 5px 0 0 0; opacity: 0.8; font-family: 'Plus Jakarta Sans';">Elite Facility Intelligence & Orchestration</p>
+        </div>
+        <div style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; gap: 8px;">
+            <div style="width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981;"></div>
+            <span style="font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px;">SYSTEM LIVE</span>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-tabs = st.tabs(["📊 Occupancy Dashboard", "📝 Quick Booking", "⚙️ Management"])
+tabs = st.tabs(["📊 DASHBOARD", "📝 NEW BOOKING", "⚙️ OPERATIONS"])
 
 # Tab 1: Dashboard
 with tabs[0]:
-    col1, col2, col3, col4 = st.columns(4)
-    
-    # Refresh cache for latest data
+    # Custom Metrics with Premium Look
     bookings = booking_manager.get_all_bookings()
-    
-    # Metrics
     today_str = get_taipei_now().strftime("%Y-%m-%d")
     today_bookings = [b for b in bookings if b.date.strftime("%Y-%m-%d") == today_str and "Booked" in b.status]
     total_slots = (settings.operating_hours_end - settings.operating_hours_start) * settings.court_count
     occupancy = (len(today_bookings) / total_slots) * 100 if total_slots > 0 else 0
     
-    with col1:
-        st.metric("Today's Bookings", len(today_bookings))
-    with col2:
-        st.metric("Occupancy Rate", f"{occupancy:.1f}%")
-    with col3:
-        st.metric("Active Courts", settings.court_count)
-    with col4:
-        st.metric("Next 7 Days", sum(1 for b in bookings if b.date.date() >= get_taipei_now().date()))
+    m1, m2, m3, m4 = st.columns(4)
+    with m1:
+        st.metric("Today's Work", len(today_bookings), delta=f"{occupancy:.1f}% Use")
+    with m2:
+        st.metric("Total Courts", settings.court_count)
+    with m3:
+        st.metric("Upcoming", sum(1 for b in bookings if b.date.date() >= get_taipei_now().date()))
+    with m4:
+        st.metric("Status", "Online", delta="Stable")
 
-    st.markdown("### 🗓️ Visual Availability Matrix")
+    st.markdown("---")
+    
+    # MOBILE OPTIMIZATION: Day Selection
+    st.markdown("### 🗓️ Availability Matrix")
+    
+    all_dates = [(get_taipei_now() + timedelta(days=i)).strftime("%a %d/%m") for i in range(7)]
+    selected_day = st.selectbox(
+        "📱 Mobile View: Select Day to Zoom In", 
+        ["View All Days (Desktop)"] + all_dates,
+        index=0
+    )
+    
     df = format_availability_df(bookings)
     
+    # Filter DF if a specific day is selected
+    display_df = df.copy()
+    if selected_day != "View All Days (Desktop)":
+        display_df = df[["Slot", selected_day]]
+
     # Display table with formatting
     def color_cells(val):
         if "🔴" in str(val):
-            return 'background-color: #ffebee; color: #c62828;'
+            return 'background-color: #fee2e2; color: #991b1b; font-weight: bold; border-left: 4px solid #ef4444;'
         elif "✅" in str(val):
-            return 'background-color: #e8f5e9; color: #2e7d32;'
+            return 'background-color: #f0fdf4; color: #166534; opacity: 0.9;'
         return ''
 
     st.dataframe(
-        df.style.applymap(color_cells, subset=df.columns[1:]),
-        height=600,
+        display_df.style.applymap(color_cells, subset=display_df.columns[1:]),
+        height=550 if selected_day == "View All Days (Desktop)" else 400,
         use_container_width=True,
         hide_index=True
     )
+    
+    st.caption("💡 Tip: Click 'Slot' headings to sort. Cell-phone users should select a specific day for the best experience.")
 
 # Tab 2: Quick Booking
 with tabs[1]:
@@ -337,5 +421,19 @@ with tabs[2]:
             st.rerun()
 
 # Footer
-st.divider()
-st.caption("Developed by AI Expert Framework | Version 2.0 Premium")
+st.markdown("---")
+f1, f2 = st.columns([2, 1])
+with f1:
+    st.markdown("""
+    <div style="opacity: 0.6; font-size: 0.85rem;">
+        <strong>© 2024 Executive Facility Systems</strong><br>
+        Built with High-Performance Python & Streamlit Resilience Engine
+    </div>
+    """, unsafe_allow_html=True)
+with f2:
+    st.markdown(f"""
+    <div style="text-align: right; opacity: 0.6; font-size: 0.85rem;">
+        v4.0.2 Premium Edition<br>
+        Node Status: <span style="color: #10b981;">Online</span>
+    </div>
+    """, unsafe_allow_html=True)
