@@ -157,18 +157,23 @@ st.markdown("""
         overflow: hidden;
     }
 
-    /* HIGH CONTRAST TAB OPTIMIZATION */
-    /* Target the tab text */
+    /* ULTRA-SHARP TAB OPTIMIZATION */
+    /* Target the tab text with extra-bold weight and high-definition rendering */
     div[data-baseweb="tab"] p {
-        font-size: 1rem !important;
-        font-weight: 700 !important;
+        font-size: 1.1rem !important; /* Slightly larger for better tap targets */
+        font-weight: 800 !important; /* Extra Bold for maximum sharpness */
+        letter-spacing: 0.5px !important; /* Prevent letter crowding */
+        color: #000000 !important; /* Absolute Black for extreme contrast */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
         transition: var(--transition);
-        color: #0f172a !important; /* Deep Black/Slate for inactive */
     }
 
-    /* Active tab text */
+    /* Active tab text - Ultra Sharp Red */
     div[aria-selected="true"] p {
-        color: #dc2626 !important; /* Premium Red for active */
+        color: #FF0000 !important; /* Pure High-Vis Red */
+        text-shadow: 0 0 1px rgba(255,0,0,0.1); /* Subtle depth without blurring */
     }
 
     /* Active tab indicator (the line underneath) */
